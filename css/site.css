@@ -406,3 +406,7 @@ table.roles .role-more dt:first-child { margin-top: 2px; }
 .x-panel--meeting .x-panel__row { padding: 22px 0; }
 .x-panel--meeting .x-panel__value { font-size: 20px; margin-top: 8px; }
 .x-panel--meeting .x-panel__meta { font-size: 14.5px; margin-top: 6px; }
+
+/* Login: password-reuse notice */
+.pw-note { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: #FFF7E6; border: 1px solid #F5D9A3; color: #6B4A0B; font-size: 14px; line-height: 1.5; }
+.pw-note strong { color: #4A3307; }
