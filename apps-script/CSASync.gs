@@ -7,7 +7,7 @@
  *   2. Copies the Internship Scout "Opportunities" tab to the site.
  *   3. Emails officers when someone signs up but isn't on the roster yet,
  *      and emails that person once a later roster upload unlocks them.
- *   4. Reminds officers when the roster file is more than 30 days old.
+ *   4. Reminds officers when the roster file is more than 7 days old.
  *   5. Copies the "Officers" sheet to the site's Team page and For Companies contact card.
  *
  * Setup (see README.md, "Roster sync"):
@@ -27,7 +27,7 @@
 
 const DEFAULT_SCOUT_TAB = 'Opportunities';
 const DEFAULT_TEAM_TAB = 'Officers';
-const STALE_ROSTER_DAYS = 30;
+const STALE_ROSTER_DAYS = 7;
 const MIN_ROSTER_RATIO = 0.5; // refuse an upload that would shrink the roster by more than half
 
 // ---------------------------------------------------------------------------

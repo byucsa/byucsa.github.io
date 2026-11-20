@@ -371,3 +371,32 @@ table.roles .role-more dt:first-child { margin-top: 2px; }
 /* Scout: show-more footer */
 .more-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; color: var(--subtle); font-size: 14px; }
 .more-bar:has(span:empty) { display: none; }
+
+/* Home hero: "CSA at a glance" card (from the sleek design) */
+.hero--panel .container.hero-split { gap: 48px 56px; align-items: center; }
+.hero--panel .hero-split__copy { flex: 1 1 520px; }
+.x-panel { flex: 1 1 340px; max-width: 430px; background: rgba(255,255,255,.9); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 30px 60px -40px rgba(2,18,48,.45); padding: 8px 24px; backdrop-filter: blur(8px); position: relative; }
+.x-panel__row { padding: 20px 0; border-bottom: 1px solid var(--line); }
+.x-panel__row:last-child { border-bottom: none; }
+.x-panel__label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); }
+.x-panel__value { font-family: var(--font-head); font-size: 17px; font-weight: 700; margin-top: 6px; letter-spacing: -.01em; color: var(--ink); }
+.x-panel__meta { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+.x-panel__meta a { color: var(--blue-text); }
+.x-panel__logos { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; margin-top: 14px; }
+.x-panel__logos img { width: auto; max-width: 84px; filter: grayscale(1); opacity: .7; }
+.x-panel__more { display: inline-flex; align-items: center; height: 32px; padding: 0 14px; border-radius: 999px; background: #EEF3FD; color: var(--blue-text); font-family: var(--font-head); font-size: 13px; font-weight: 700; white-space: nowrap; }
+@media (max-width: 900px) { .x-panel { max-width: none; } }
+
+/* Home join card (dark card with arc, from the sleek design) */
+.x-cta { background: var(--navy); color: #fff; border-radius: 20px; padding: 56px 64px; display: flex; flex-wrap: wrap; gap: 36px 56px; position: relative; overflow: hidden; }
+.x-cta::after { content: ""; position: absolute; right: -160px; top: -160px; width: 420px; height: 420px; border-radius: 50%; border: 1.5px solid rgba(143,180,255,.35); pointer-events: none; }
+.x-cta > * { position: relative; z-index: 1; }
+.x-cta__copy { flex: 1 1 380px; }
+.x-cta h2 { font-family: var(--font-head); font-size: clamp(28px, 3.2vw, 38px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; color: #fff; }
+.x-cta__copy p { margin-top: 16px; color: var(--on-navy); font-size: 16px; }
+.x-cta__steps { flex: 1 1 340px; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.x-cta__steps li { display: flex; gap: 14px; align-items: center; font-size: 15px; color: var(--on-navy); }
+.x-cta__steps strong { color: #fff; font-weight: 600; }
+.x-cta__steps span { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: #fff; }
+.x-cta__actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 12px; }
+@media (max-width: 700px) { .x-cta { padding: 32px 24px; border-radius: 16px; } }

@@ -106,7 +106,7 @@ Because the sync contacts Supabase every hour, it should also keep the free proj
 |---|---|---|
 | Start of each semester | Export the roster from clubs.byu.edu and drop it in CSA Roster | 2 min |
 | When you get a "sign-ups waiting" email | Same as above | 2 min |
-| When you get a "roster is 30 days old" reminder | Same as above | 2 min |
+| When you get a weekly "upload a fresh roster" reminder (roster older than 7 days) | Same as above | 2 min |
 | As needed | Add events in Luma (the site updates itself) | 2 min |
 | When officers change | Edit the Officers sheet (and upload new headshots) | 5 min |
 
