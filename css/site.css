@@ -353,3 +353,11 @@ table.roles .role-more dt { font-weight: 600; color: var(--ink, #0F172A); }
 table.roles .role-more dd { margin: 0; }
 table.roles tr.role--passed td { opacity: .6; }
 .tag--soon { background: #FEF3C7; color: #92400E; }
+
+/* Scout: sortable headers + sort menu */
+table.roles th .th-sort { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; color: inherit; font: inherit; }
+table.roles th .th-sort:hover span:first-child { text-decoration: underline; }
+table.roles th .th-sort:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 3px; }
+table.roles th .th-sort__arrow { font-size: 10px; opacity: .55; }
+table.roles th[aria-sort="ascending"] .th-sort__arrow, table.roles th[aria-sort="descending"] .th-sort__arrow { opacity: 1; }
+.sort-menu { height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font: inherit; font-size: 14px; color: var(--ink); }

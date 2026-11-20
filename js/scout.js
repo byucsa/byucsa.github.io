@@ -11,6 +11,7 @@ const search = document.getElementById("scout-search");
 const utahToggle = document.getElementById("utah-toggle");
 let roles = [];
 let utahOnly = false;
+let sort = { key: "deadline", dir: 1 };
 
 const submit = document.getElementById("submit-role");
 if (CONFIG.SUBMIT_ROLE_URL && !CONFIG.SUBMIT_ROLE_URL.startsWith("[")) {
@@ -41,11 +42,93 @@ function tagEl(text, cls) {
   t.textContent = text;
   return t;
 }
-// Open roles by deadline (soonest first), then roles with no deadline, then passed deadlines.
+// ---------- Sorting ----------
+const SORTS = {
+  deadline: { label: "Deadline", desc: "Deadline (soonest first)", flip: "Deadline (latest first)" },
+  company: { label: "Company", desc: "Company (A–Z)", flip: "Company (Z–A)" },
+  title: { label: "Role", desc: "Role (A–Z)", flip: "Role (Z–A)" },
+  location: { label: "Location", desc: "Location (A–Z)", flip: "Location (Z–A)" },
+  pay: { label: "Pay", desc: "Pay (highest first)", flip: "Pay (lowest first)" },
+};
+const text = (v) => show(v).toLowerCase();
+// Rough yearly pay so hourly, monthly, and salary listings compare. Unknown pay sorts last.
+function payValue(r) {
+  const t = show(r.compensation).toLowerCase().replace(/,/g, "");
+  const m = t.match(/\$?\s*(\d+(?:\.\d+)?)\s*(k)?/);
+  if (!m) return null;
+  let n = parseFloat(m[1]) * (m[2] ? 1000 : 1);
+  if (/hour|\/hr|\bhr\b|hourly/.test(t)) n *= 2080;
+  else if (/week|\/wk/.test(t)) n *= 52;
+  else if (/month|\/mo/.test(t)) n *= 12;
+  else if (n < 200) n *= 2080; // a bare small number is almost always hourly
+  return n;
+}
+function byText(a, b, key) {
+  const x = text(a[key]), y = text(b[key]);
+  if (!x !== !y) return x ? -1 : 1; // blanks last
+  return x.localeCompare(y);
+}
+// For the deadline sort: open roles first, then no deadline, then passed deadlines.
+function rank(r) { const d = daysUntil(r.deadline_date); return d < 0 ? 2 : d === Infinity ? 1 : 0; }
 function order(a, b) {
-  const rank = (r) => { const d = daysUntil(r.deadline_date); return d < 0 ? 2 : d === Infinity ? 1 : 0; };
-  return rank(a) - rank(b) || String(a.deadline_date || "").localeCompare(String(b.deadline_date || "")) ||
-    String(a.company || "").localeCompare(String(b.company || ""));
+  const { key, dir } = sort;
+  let c = 0;
+  if (key === "deadline") {
+    c = rank(a) - rank(b) || dir * String(a.deadline_date || "").localeCompare(String(b.deadline_date || ""));
+  } else if (key === "pay") {
+    const x = payValue(a), y = payValue(b);
+    c = (x === null) - (y === null) || (x !== null && y !== null ? dir * (y - x) : 0);
+  } else {
+    const x = text(a[key]), y = text(b[key]);
+    c = (!x) - (!y) || dir * x.localeCompare(y);
+  }
+  return c || byText(a, b, "company") || byText(a, b, "title");
+}
+function sortLabel() { return (sort.dir === 1 ? SORTS[sort.key].desc : SORTS[sort.key].flip).toLowerCase(); }
+
+// Clickable column headers + a "Sort by" menu (for phones), kept in sync.
+const ths = [...document.querySelectorAll("table.roles thead th")];
+const colKeys = ["company", "title", "location", "deadline", "pay"];
+ths.forEach((th, i) => {
+  const key = colKeys[i];
+  if (!key) return;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "th-sort";
+  btn.dataset.key = key;
+  btn.innerHTML = `<span></span><span class="th-sort__arrow" aria-hidden="true"></span>`;
+  btn.firstChild.textContent = th.textContent;
+  th.textContent = "";
+  th.append(btn);
+  btn.addEventListener("click", () => setSort(key, sort.key === key ? -sort.dir : 1));
+});
+const menu = document.createElement("select");
+menu.id = "scout-sort";
+menu.className = "sort-menu";
+menu.setAttribute("aria-label", "Sort roles");
+for (const [k, v] of Object.entries(SORTS)) {
+  for (const d of [1, -1]) {
+    const o = document.createElement("option");
+    o.value = k + ":" + d;
+    o.textContent = "Sort: " + (d === 1 ? v.desc : v.flip);
+    menu.append(o);
+  }
+}
+utahToggle.after(menu);
+menu.addEventListener("change", () => { const [k, d] = menu.value.split(":"); setSort(k, Number(d)); });
+
+function setSort(key, dir) {
+  sort = { key, dir };
+  menu.value = key + ":" + dir;
+  ths.forEach((th, i) => {
+    const k = colKeys[i];
+    if (!k) return;
+    const on = k === sort.key;
+    th.setAttribute("aria-sort", on ? (sort.dir === 1 ? (k === "pay" ? "descending" : "ascending") : (k === "pay" ? "ascending" : "descending")) : "none");
+    th.querySelector(".th-sort__arrow").textContent = on ? (th.getAttribute("aria-sort") === "ascending" ? "▲" : "▼") : "↕";
+  });
+  try { localStorage.setItem("csa-scout-sort", key + ":" + dir); } catch {}
+  if (roles.length) render();
 }
 function daysUntil(iso) {
   if (!iso) return Infinity;
@@ -114,7 +197,7 @@ function render() {
     body.append(tr);
   }
   empty.hidden = rows.length > 0;
-  count.textContent = `Showing ${rows.length} ${rows.length === 1 ? "role" : "roles"}. Sorted by deadline, soonest first.`;
+  count.textContent = `Showing ${rows.length} ${rows.length === 1 ? "role" : "roles"}. Sorted by ${sortLabel()}.`;
 }
 
 function stats() {
@@ -135,6 +218,13 @@ utahToggle.addEventListener("click", () => {
   utahToggle.textContent = utahOnly ? "Utah only: on" : "Utah only";
   render();
 });
+
+{
+  let saved = null;
+  try { saved = localStorage.getItem("csa-scout-sort"); } catch {}
+  const [k, d] = String(saved || "").split(":");
+  setSort(SORTS[k] ? k : "deadline", Number(d) === -1 ? -1 : 1);
+}
 
 (async () => {
   const member = await requireActiveMember("scout.html");
