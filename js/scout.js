@@ -47,7 +47,7 @@ const SORTS = {
   deadline: { label: "Deadline", desc: "Deadline (soonest first)", flip: "Deadline (latest first)" },
   company: { label: "Company", desc: "Company (A–Z)", flip: "Company (Z–A)" },
   title: { label: "Role", desc: "Role (A–Z)", flip: "Role (Z–A)" },
-  location: { label: "Location", desc: "Location (A–Z)", flip: "Location (Z–A)" },
+  location: { label: "Location", desc: "State (A–Z)", flip: "State (Z–A)" },
   pay: { label: "Pay", desc: "Pay (highest first)", flip: "Pay (lowest first)" },
 };
 const text = (v) => show(v).toLowerCase();
@@ -63,6 +63,25 @@ function payValue(r) {
   else if (n < 200) n *= 2080; // a bare small number is almost always hourly
   return n;
 }
+// Location sorts by state first (then city), without changing what's shown.
+const STATES = { alabama:"AL", alaska:"AK", arizona:"AZ", arkansas:"AR", california:"CA", colorado:"CO", connecticut:"CT", delaware:"DE", "district of columbia":"DC", florida:"FL", georgia:"GA", hawaii:"HI", idaho:"ID", illinois:"IL", indiana:"IN", iowa:"IA", kansas:"KS", kentucky:"KY", louisiana:"LA", maine:"ME", maryland:"MD", massachusetts:"MA", michigan:"MI", minnesota:"MN", mississippi:"MS", missouri:"MO", montana:"MT", nebraska:"NE", nevada:"NV", "new hampshire":"NH", "new jersey":"NJ", "new mexico":"NM", "new york":"NY", "north carolina":"NC", "north dakota":"ND", ohio:"OH", oklahoma:"OK", oregon:"OR", pennsylvania:"PA", "rhode island":"RI", "south carolina":"SC", "south dakota":"SD", tennessee:"TN", texas:"TX", utah:"UT", vermont:"VT", virginia:"VA", washington:"WA", "west virginia":"WV", wisconsin:"WI", wyoming:"WY" };
+const ABBR = new Set(Object.values(STATES));
+function stateOf(r) {
+  const loc = show(r.location);
+  if (!loc || /^(n\/?a|not stated|tbd)\b/i.test(loc)) return "";
+  if (/^(remote|united states|u\.?s\.?\b|nationwide)/i.test(loc)) return "ZZ"; // remote / nationwide after the states
+  for (const m of loc.matchAll(/,\s*([A-Z]{2})\b/g)) if (ABBR.has(m[1])) return m[1];
+  const low = loc.toLowerCase();
+  const name = Object.keys(STATES).sort((x, y) => y.length - x.length).find((n) => low.includes(n));
+  if (name) return STATES[name];
+  if (/remote|united states|\bu\.?s\.?\b|nationwide/i.test(loc)) return "ZZ"; // remote / multi-state after the states
+  return "";
+}
+function locationKey(r) {
+  const st = stateOf(r);
+  return st ? st + " " + show(r.location).toLowerCase() : "";
+}
+
 function byText(a, b, key) {
   const x = text(a[key]), y = text(b[key]);
   if (!x !== !y) return x ? -1 : 1; // blanks last
@@ -79,7 +98,8 @@ function order(a, b) {
     const x = payValue(a), y = payValue(b);
     c = (x === null) - (y === null) || (x !== null && y !== null ? dir * (y - x) : 0);
   } else {
-    const x = text(a[key]), y = text(b[key]);
+    const x = key === "location" ? locationKey(a) : text(a[key]);
+    const y = key === "location" ? locationKey(b) : text(b[key]);
     c = (!x) - (!y) || dir * x.localeCompare(y);
   }
   return c || byText(a, b, "company") || byText(a, b, "title");
