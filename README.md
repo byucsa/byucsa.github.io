@@ -85,6 +85,7 @@ Every change pushed to the repository republishes the site automatically.
    | `ROSTER_FOLDER_ID` | CSA Roster folder ID |
    | `SCOUT_SHEET_ID` | Internship Scout sheet ID |
    | `TEAM_SHEET_ID` | Officers sheet ID (Team page; see "Leadership changes" below) |
+   | `LUMA_ICAL_URL` | Optional: the Luma calendar's iCal feed link. The home page card then shows the next event. |
    | `OFFICER_EMAILS` | Comma-separated officer emails for alerts |
    | `SITE_URL` | Your site address |
 
@@ -123,7 +124,7 @@ The Team page updates within the hour. If the sheet is ever empty or broken, the
 
 ## Editing content
 
-- **Events (Luma):** create a CSA calendar on Luma, then paste two links into `js/config.js`: `LUMA_EMBED_URL` (Luma > calendar > Settings > Embed, the iframe's `src`) and `LUMA_CALENDAR_URL` (the calendar's public page). The Events Calendar page (`events.html`) then shows live upcoming events, and its "Subscribe to calendar" button points to Luma. New events appear automatically when you add them in Luma.
+- **Events (Luma):** create a CSA calendar on Luma, then paste two links into `js/config.js`: `LUMA_EMBED_URL` (Luma > calendar > Settings > Embed, the iframe's `src`) and `LUMA_CALENDAR_URL` (the calendar's public page). The Events Calendar page (`events.html`) then shows live upcoming events, and its "Subscribe to calendar" button points to Luma. New events appear automatically when you add them in Luma. To have the home page "at a glance" card show the next event, copy the calendar's iCal link (Luma > calendar > Subscribe / Add to calendar) into the `LUMA_ICAL_URL` script property. The card falls back to the regular meeting time when nothing is scheduled.
 - **Member resources (files):** upload the file in Supabase > **Storage > resources** (folders are fine, e.g. `recruiting/strategy-resume-template.docx`). Then in **Table Editor > resources**, put that path in `file_path` and set `status` to `live`. The bucket is private: files have no public link, and the site only hands an active member a link that expires after 5 minutes. Use this for anything members-only. Free plan storage (about 1 GB) is plenty for Excel files, slide decks, and documents.
 - **Member resources (links):** for outside tools like the case agent, paste the link into `url` instead. Those links work for anyone who has them, so don't use `url` for files you want kept to members.
 - Add rows to add resources; `sort` controls order. Changes show immediately.
@@ -161,7 +162,7 @@ login.html, pending.html, resources.html, scout.html   member area
 css/site.css                                           all styles (colors from the CSA logo)
 js/config.js                                           Supabase keys and links (edit this)
 js/auth.js                                             login, membership check, data loading, demo mode
-js/login.js, pending.js, resources.js, scout.js, team.js   page logic
+js/login.js, pending.js, resources.js, scout.js, team.js, next-event.js   page logic
 js/demo-data.js                                        sample content for demo mode
 supabase/schema.sql                                    database setup (run once)
 apps-script/CSASync.gs                                 hourly roster + Scout sync and emails

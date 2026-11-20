@@ -208,6 +208,49 @@ $$;
 revoke all on function public.sync_team(jsonb) from public, anon, authenticated;
 grant execute on function public.sync_team(jsonb) to service_role;
 
+-- ---------------------------------------------------------------------------
+-- Upcoming events (public): synced hourly from the CSA Luma calendar feed
+-- ---------------------------------------------------------------------------
+create table if not exists public.events (
+  uid        text primary key,
+  title      text not null,
+  starts_at  timestamptz not null,
+  ends_at    timestamptz,
+  location   text,
+  url        text,
+  synced_at  timestamptz not null default now()
+);
+alter table public.events enable row level security;
+drop policy if exists "Anyone can read events" on public.events;
+create policy "Anyone can read events" on public.events for select to anon, authenticated using (true);
+revoke insert, update, delete on public.events from anon, authenticated;
+grant select on public.events to anon, authenticated;
+
+create or replace function public.sync_events(rows jsonb)
+returns int
+language plpgsql security definer set search_path = public
+as $$
+declare n int;
+begin
+  if jsonb_typeof(rows) <> 'array' then
+    raise exception 'sync_events: expected an array';
+  end if;
+  delete from public.events where true;
+  insert into public.events (uid, title, starts_at, ends_at, location, url)
+  select distinct on (x->>'uid')
+         x->>'uid', trim(x->>'title'), (x->>'starts_at')::timestamptz,
+         nullif(x->>'ends_at', '')::timestamptz,
+         nullif(trim(coalesce(x->>'location', '')), ''),
+         nullif(trim(coalesce(x->>'url', '')), '')
+  from jsonb_array_elements(rows) x
+  where coalesce(x->>'uid', '') <> '' and coalesce(trim(x->>'title'), '') <> '' and coalesce(x->>'starts_at', '') <> '';
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+revoke all on function public.sync_events(jsonb) from public, anon, authenticated;
+grant execute on function public.sync_events(jsonb) to service_role;
+
 -- Public catalogue: names and descriptions only (never links or files), so
 -- non-members can see what membership unlocks. Powers the locked preview.
 create or replace function public.resource_catalogue()

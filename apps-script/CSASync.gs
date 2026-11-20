@@ -9,6 +9,7 @@
  *      and emails that person once a later roster upload unlocks them.
  *   4. Reminds officers when the roster file is more than 7 days old.
  *   5. Copies the "Officers" sheet to the site's Team page and For Companies contact card.
+ *   6. Reads the CSA Luma calendar feed and saves upcoming events (home page "Next event").
  *
  * Setup (see README.md, "Roster sync"):
  *   Project Settings > Script properties, add:
@@ -22,6 +23,7 @@
  *   Optional:
  *     SCOUT_TAB             defaults to "Opportunities"
  *     TEAM_TAB              defaults to "Officers"
+ *     LUMA_ICAL_URL         the Luma calendar's iCal / "Add to calendar" feed link
  *   Then run setup() once and approve the permissions prompt.
  */
 
@@ -47,7 +49,7 @@ function setup() {
 
 function syncAll() {
   const errors = [];
-  [syncRoster, syncScout, syncTeam, notifyMembers, remindIfRosterStale].forEach((fn) => {
+  [syncRoster, syncScout, syncTeam, syncEvents, notifyMembers, remindIfRosterStale].forEach((fn) => {
     try { fn(); } catch (e) { errors.push(fn.name + ': ' + e.message); Logger.log(e.stack || e); }
   });
   if (errors.length) alertOfficersOnce_('sync-error', 'CSA site sync error',
@@ -228,6 +230,86 @@ function parseTeam_(table) {
     });
   });
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Luma calendar feed -> upcoming events (home page "Next event" card)
+// Set LUMA_ICAL_URL to the calendar's iCal link (Luma > calendar > subscribe /
+// "Add to calendar" > copy the iCal or webcal link). Keeps the next 10 events.
+// ---------------------------------------------------------------------------
+function syncEvents() {
+  const p = props_();
+  if (!p.LUMA_ICAL_URL) return;
+  const url = String(p.LUMA_ICAL_URL).trim().replace(/^webcal:/i, 'https:');
+  const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
+  if (res.getResponseCode() !== 200) throw new Error('Luma feed returned HTTP ' + res.getResponseCode());
+  const now = Date.now();
+  const rows = parseIcs_(res.getContentText(), Session.getScriptTimeZone())
+    .filter((e) => (e.end || e.start) >= now)
+    .sort((a, b) => a.start - b.start)
+    .slice(0, 10)
+    .map((e) => ({
+      uid: e.uid, title: e.title, location: e.location, url: e.url,
+      starts_at: new Date(e.start).toISOString(),
+      ends_at: e.end ? new Date(e.end).toISOString() : '',
+    }));
+  const stamp = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, JSON.stringify(rows)));
+  const store = PropertiesService.getScriptProperties();
+  if (store.getProperty('EVENTS_STAMP') === stamp) return;
+  const n = rpc_('sync_events', { rows: rows });
+  store.setProperty('EVENTS_STAMP', stamp);
+  Logger.log('Events synced: ' + n + ' upcoming');
+}
+
+function parseIcs_(text, defaultTz) {
+  // Unfold continuation lines, then read each VEVENT.
+  const lines = String(text).replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '').split('\n');
+  const unescape = (v) => String(v || '').replace(/\\n/gi, '\n').replace(/\\([,;\\])/g, '$1').trim();
+  const out = [];
+  let ev = null;
+  lines.forEach((line) => {
+    if (line === 'BEGIN:VEVENT') { ev = {}; return; }
+    if (line === 'END:VEVENT') {
+      if (ev && ev.start && ev.title && !/^CANCELLED$/i.test(ev.status || '')) {
+        if (!ev.url) {
+          const m = (ev.description || '').match(/https?:\/\/(?:lu\.ma|luma\.com)\/[^\s)>"]+/i);
+          if (m) ev.url = m[0];
+        }
+        if (ev.location && /^https?:\/\//i.test(ev.location)) ev.location = 'Online';
+        ev.uid = ev.uid || (ev.title + '@' + ev.start);
+        out.push(ev);
+      }
+      ev = null; return;
+    }
+    if (!ev) return;
+    const i = line.indexOf(':');
+    if (i < 0) return;
+    const head = line.slice(0, i), value = line.slice(i + 1);
+    const parts = head.split(';');
+    const name = parts[0].toUpperCase();
+    const params = {};
+    parts.slice(1).forEach((x) => { const [k, v] = x.split('='); params[String(k).toUpperCase()] = v; });
+    if (name === 'SUMMARY') ev.title = unescape(value);
+    else if (name === 'LOCATION') ev.location = unescape(value);
+    else if (name === 'URL') ev.url = unescape(value);
+    else if (name === 'UID') ev.uid = unescape(value);
+    else if (name === 'DESCRIPTION') ev.description = unescape(value);
+    else if (name === 'STATUS') ev.status = value.trim();
+    else if (name === 'DTSTART') ev.start = icsTime_(value, params, defaultTz);
+    else if (name === 'DTEND') ev.end = icsTime_(value, params, defaultTz);
+  });
+  return out;
+}
+
+function icsTime_(value, params, defaultTz) {
+  const v = String(value).trim();
+  let m = v.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
+  if (m) return Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+  m = v.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2}))?$/);
+  if (!m) return null;
+  const tz = params.TZID || defaultTz;
+  const stamp = m[1] + '-' + m[2] + '-' + m[3] + ' ' + (m[4] || '00') + ':' + (m[5] || '00') + ':' + (m[6] || '00');
+  return Utilities.parseDate(stamp, tz, 'yyyy-MM-dd HH:mm:ss').getTime();
 }
 
 // ---------------------------------------------------------------------------

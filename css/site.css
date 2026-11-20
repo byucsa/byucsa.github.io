@@ -400,3 +400,9 @@ table.roles .role-more dt:first-child { margin-top: 2px; }
 .x-cta__steps span { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: #fff; }
 .x-cta__actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 12px; }
 @media (max-width: 700px) { .x-cta { padding: 32px 24px; border-radius: 16px; } }
+
+/* Next club meeting card (single row) */
+.x-panel--meeting { padding: 10px 28px; }
+.x-panel--meeting .x-panel__row { padding: 22px 0; }
+.x-panel--meeting .x-panel__value { font-size: 20px; margin-top: 8px; }
+.x-panel--meeting .x-panel__meta { font-size: 14.5px; margin-top: 6px; }
