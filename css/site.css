@@ -367,3 +367,7 @@ table.roles td { padding-top: 12px; padding-bottom: 12px; }
 table.roles .role-more dl { grid-template-columns: 1fr; gap: 2px; }
 table.roles .role-more dt { margin-top: 8px; }
 table.roles .role-more dt:first-child { margin-top: 2px; }
+
+/* Scout: show-more footer */
+.more-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; color: var(--subtle); font-size: 14px; }
+.more-bar:has(span:empty) { display: none; }

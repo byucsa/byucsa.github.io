@@ -12,6 +12,8 @@ const utahToggle = document.getElementById("utah-toggle");
 let roles = [];
 let utahOnly = false;
 let sort = { key: "deadline", dir: 1 };
+const PAGE = 20;
+let limit = PAGE;
 
 const submit = document.getElementById("submit-role");
 if (CONFIG.SUBMIT_ROLE_URL && !CONFIG.SUBMIT_ROLE_URL.startsWith("[")) {
@@ -137,8 +139,25 @@ for (const [k, v] of Object.entries(SORTS)) {
 utahToggle.after(menu);
 menu.addEventListener("change", () => { const [k, d] = menu.value.split(":"); setSort(k, Number(d)); });
 
+// "Show more" footer under the table.
+const moreBar = document.createElement("div");
+moreBar.className = "more-bar";
+const moreText = document.createElement("span");
+const moreBtn = document.createElement("button");
+moreBtn.type = "button";
+moreBtn.className = "btn btn--outline btn--sm";
+const allBtn = document.createElement("button");
+allBtn.type = "button";
+allBtn.className = "linkish";
+allBtn.textContent = "Show all";
+moreBar.append(moreText, moreBtn, allBtn);
+empty.after(moreBar);
+moreBtn.addEventListener("click", () => { limit += PAGE; render(); });
+allBtn.addEventListener("click", () => { limit = Infinity; render(); });
+
 function setSort(key, dir) {
   sort = { key, dir };
+  limit = PAGE;
   menu.value = key + ":" + dir;
   ths.forEach((th, i) => {
     const k = colKeys[i];
@@ -166,7 +185,7 @@ function render() {
       .some((v) => (v || "").toLowerCase().includes(q));
   }).sort(order);
   body.textContent = "";
-  for (const r of rows) {
+  for (const r of rows.slice(0, limit)) {
     const tr = document.createElement("tr");
     tr.append(td(r.company, "company"));
     const title = td(r.title, "title");
@@ -212,7 +231,12 @@ function render() {
     body.append(tr);
   }
   empty.hidden = rows.length > 0;
-  count.textContent = `Showing ${rows.length} ${rows.length === 1 ? "role" : "roles"}. Sorted by ${sortLabel()}.`;
+  const shown = Math.min(limit, rows.length);
+  count.textContent = `${rows.length} ${rows.length === 1 ? "role" : "roles"}, sorted by ${sortLabel()}.`;
+  moreText.textContent = rows.length ? `Showing ${shown} of ${rows.length}` : "";
+  moreBtn.hidden = shown >= rows.length;
+  moreBtn.textContent = `Show ${Math.min(PAGE, rows.length - shown)} more`;
+  allBtn.hidden = rows.length - shown <= PAGE;
 }
 
 function stats() {
@@ -226,9 +250,10 @@ function stats() {
     : "Demo");
 }
 
-search.addEventListener("input", render);
+search.addEventListener("input", () => { limit = PAGE; render(); });
 utahToggle.addEventListener("click", () => {
   utahOnly = !utahOnly;
+  limit = PAGE;
   utahToggle.setAttribute("aria-pressed", String(utahOnly));
   utahToggle.textContent = utahOnly ? "Utah only: on" : "Utah only";
   render();
