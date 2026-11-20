@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internship Scout | CSA at BYU</title>
+<meta name="description" content="CSA Internship Scout for members.">
+<meta property="og:title" content="Internship Scout | CSA at BYU">
+<meta property="og:description" content="CSA Internship Scout for members.">
+<meta property="og:image" content="assets/csa-logo-full.png">
+<link rel="icon" type="image/png" href="assets/csa-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-member-page>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="container">
+<a class="brand" href="index.html" aria-label="CSA home"><img src="assets/csa-mark.png" alt="CSA" width="83" height="40"></a>
+<nav class="nav" aria-label="Main">
+<a href="index.html">Home</a>
+<a href="events.html">Events Calendar</a>
+<a href="students.html">For Students</a>
+<a href="companies.html">For Companies</a>
+<a href="resources.html" aria-current="page">Resources<svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></a>
+<a href="team.html">Team</a>
+</nav>
+<div class="header-actions">
+<a class="btn btn--outline" href="index.html#join" data-guest-only>Join</a>
+<a class="btn btn--dark" href="login.html" data-member-link><svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg><span data-member-label>Student login</span></a>
+</div>
+</div>
+</header>
+<div class="member-bar"><div class="container">
+<span>Signed in as <strong data-member-name>…</strong> · Membership active through <strong data-member-expires>…</strong></span>
+</div></div>
+<main id="main">
+<section class="hero hero--navy hero--compact">
+<div class="arc arc--navy" aria-hidden="true"></div>
+<div class="container">
+<p class="eyebrow"><a href="resources.html" style="color:inherit;text-decoration:none">Back to member resources</a></p>
+<h1 style="font-size:clamp(34px,4.4vw,50px)">Internship Scout</h1>
+<p class="lead">Undergraduate internships in corporate strategy, corp dev, pricing, commercial strategy, and strategic finance. Every posting is checked by hand before it goes up.</p>
+<div style="display:flex;flex-wrap:wrap;gap:14px 40px;margin-top:32px" id="scout-stats">
+<div style="border-left:2px solid var(--blue);padding-left:14px"><div style="font-family:var(--font-head);font-size:28px;font-weight:800" data-stat="open">–</div><div style="font-size:13px;color:var(--on-navy)">Open roles</div></div>
+<div style="border-left:2px solid var(--blue);padding-left:14px"><div style="font-family:var(--font-head);font-size:28px;font-weight:800" data-stat="utah">–</div><div style="font-size:13px;color:var(--on-navy)">In Utah</div></div>
+<div style="border-left:2px solid var(--blue);padding-left:14px"><div style="font-family:var(--font-head);font-size:28px;font-weight:800" data-stat="soon">–</div><div style="font-size:13px;color:var(--on-navy)">Closing in 14 days</div></div>
+<div style="border-left:2px solid var(--blue);padding-left:14px"><div style="font-family:var(--font-head);font-size:28px;font-weight:800" data-stat="updated">–</div><div style="font-size:13px;color:var(--on-navy)">Last updated</div></div>
+</div>
+</div>
+</section>
+
+<section class="section section--tight" aria-labelledby="roles-h">
+<div class="container">
+<h2 id="roles-h" class="h2" style="font-size:30px">Open roles</h2>
+<p style="margin-top:8px;font-size:15px;color:var(--muted)" id="roles-count" aria-live="polite">Loading…</p>
+<div class="toolbar">
+<label for="scout-search" class="sr-only">Search roles</label>
+<input type="search" id="scout-search" placeholder="Search company, role, or location">
+<button type="button" class="toggle" id="utah-toggle" aria-pressed="false">Utah only</button>
+</div>
+<div class="table-wrap">
+<table class="roles">
+<thead><tr><th scope="col">Company</th><th scope="col">Role</th><th scope="col">Location</th><th scope="col">Deadline</th><th scope="col">Pay</th><th scope="col"><span class="sr-only">Apply</span></th></tr></thead>
+<tbody id="roles-body"></tbody>
+</table>
+<div class="empty" id="roles-empty" hidden>No roles match. New postings go up as we verify them.</div>
+</div>
+</div>
+</section>
+
+<section class="section section--soft" aria-labelledby="vet-h">
+<div class="container split">
+<div class="split__side">
+<h2 id="vet-h" class="h2" style="font-size:30px">How a role makes the list</h2>
+<p class="lead" style="font-size:16px">An officer reads every posting before it goes up. If the day-to-day work wouldn't help you move onto a strategy team, it's left off.</p>
+</div>
+<div class="split__main flex-wrap">
+<div class="card card--top-blue"><h3>We include</h3><ul style="margin:12px 0 0;padding-left:18px;font-size:14px;line-height:1.7;color:var(--muted)"><li>Corporate strategy and strategic planning</li><li>Corp dev, M&amp;A, and partnerships</li><li>Pricing, revenue, and commercial strategy</li><li>Strategic finance and FP&amp;A that advises leaders</li><li>BizOps and strategy &amp; operations</li></ul></div>
+<div class="card" style="border-top:3px solid var(--subtle)"><h3>We leave off</h3><ul style="margin:12px 0 0;padding-left:18px;font-size:14px;line-height:1.7;color:var(--muted)"><li>Generic sales and quota-carrying roles</li><li>Reporting-only finance and accounting</li><li>Postings without a clear analyst scope</li><li>Expired or unverifiable listings</li></ul></div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="container flex-wrap">
+<div class="card" style="flex-basis:380px;padding:32px;border-radius:6px">
+<h2 class="h2" style="font-size:22px">Found a role we missed?</h2>
+<p style="font-size:15px">Send the link. If it fits, it goes up within a day.</p>
+<a class="btn btn--primary" id="submit-role" href="#" style="margin-top:20px">Submit a role</a>
+</div>
+<div class="card" style="flex-basis:380px;padding:32px;border-radius:6px;background:var(--navy);border-color:var(--navy);color:#fff">
+<h2 class="h2" style="font-size:22px">Hiring for one of these teams?</h2>
+<p style="font-size:15px;color:var(--on-navy)">Post your internship directly to Scout and reach students preparing for strategy work.</p>
+<a class="btn btn--outline" href="companies.html#engage" style="margin-top:20px">Partner with CSA</a>
+</div>
+</div>
+</section>
+</main>
+<footer class="site-footer">
+<div class="container cols">
+<div>
+<img class="footer-logo" src="assets/csa-logo-full.png" alt="Corporate Strategy Association at BYU" width="200" height="130">
+<p style="margin-top:16px">A student association sponsored by the BYU Marriott Strategic Management program.</p>
+</div>
+<div>
+<h3>Explore</h3>
+<ul>
+<li><a href="events.html">Events Calendar</a></li>
+<li><a href="students.html">For Students</a></li>
+<li><a href="companies.html">For Companies</a></li>
+<li><a href="resources.html">Member Resources</a></li>
+<li><a href="team.html">Leadership Team</a></li>
+</ul>
+</div>
+<div>
+<h3>Contact</h3>
+<ul>
+<li><a href="mailto:csa-assoc@byu.edu">csa-assoc@byu.edu</a></li>
+<li><a href="https://www.linkedin.com/company/byu-corporate-strategy-association">LinkedIn</a></li>
+<li><a href="https://join.slack.com/t/corporatestra-ocj8773/shared_invite/zt-3ctd8a7yv-h68uKS9eZMCRR9F1qbCEYA">Slack</a></li>
+<li>TNRB 2325, Provo, UT 84602</li>
+</ul>
+</div>
+</div>
+<p class="copyright">© <span data-year>2026</span> Corporate Strategy Association at BYU</p>
+</footer>
+<script type="module" src="js/site.js"></script>
+<script type="module" src="js/scout.js"></script>
+</body>
+</html>
