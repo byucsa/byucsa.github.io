@@ -170,13 +170,8 @@ function render() {
     const tr = document.createElement("tr");
     tr.append(td(r.company, "company"));
     const title = td(r.title, "title");
-    if (show(r.responsibilities)) {
-      const p = document.createElement("div");
-      p.className = "resp";
-      p.textContent = show(r.responsibilities);
-      title.append(p);
-    }
-    const extra = [["Graduation dates", r.eligible_grad], ["Internship dates", r.internship_dates], ["Eligibility & notes", r.eligibility]]
+    // Rows stay compact: responsibilities and the rest open under "Details".
+    const extra = [["What you'd do", r.responsibilities], ["Graduation dates", r.eligible_grad], ["Internship dates", r.internship_dates], ["Eligibility & notes", r.eligibility]]
       .map(([k, v]) => [k, show(v)]).filter(([, v]) => v);
     if (extra.length) {
       const more = document.createElement("details");

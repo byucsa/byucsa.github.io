@@ -361,3 +361,9 @@ table.roles th .th-sort:focus-visible { outline: 2px solid #fff; outline-offset:
 table.roles th .th-sort__arrow { font-size: 10px; opacity: .55; }
 table.roles th[aria-sort="ascending"] .th-sort__arrow, table.roles th[aria-sort="descending"] .th-sort__arrow { opacity: 1; }
 .sort-menu { height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font: inherit; font-size: 14px; color: var(--ink); }
+
+/* Scout: compact rows; long location text clamps to two lines */
+table.roles td { padding-top: 12px; padding-bottom: 12px; }
+table.roles .role-more dl { grid-template-columns: 1fr; gap: 2px; }
+table.roles .role-more dt { margin-top: 8px; }
+table.roles .role-more dt:first-child { margin-top: 2px; }
