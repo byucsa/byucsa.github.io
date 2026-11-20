@@ -250,7 +250,8 @@ utahToggle.addEventListener("click", () => {
   const member = await requireActiveMember("scout.html");
   fillMemberBar(member);
   try {
-    roles = await fetchScoutRoles();
+    // Roles whose deadline has passed are hidden. Roles with no listed deadline stay.
+    roles = (await fetchScoutRoles()).filter((r) => daysUntil(r.deadline_date) >= 0);
     stats();
     render();
   } catch (err) {
